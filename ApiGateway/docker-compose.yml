@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+  small_ecommerce_api_dev:
+    container_name: small_ecommerce_api_dev
+    image: small-ecommerce-api-dev:1.0.0
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - rabbitmq
+    restart: unless-stopped
+    working_dir: /usr/src/app
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    command: >
+      bash -c "
+        yarn start:dev
+      "
+    networks:
+      - small-ecommerce-network
+
+  small_ecommerce_api_prod:
+    container_name: small_ecommerce_api_prod
+    image: small-ecommerce-api-prod:1.0.0
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./.env
+    restart: unless-stopped
+    working_dir: /usr/src/app
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    command: >
+      bash -c "
+        yarn start:prod
+      "
+    networks:
+      - small-ecommerce-network
+
+  rabbitmq:
+    image: rabbitmq:3.11-management-alpine
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: rabbitmq-host
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - ./rabbitmq.env
+    volumes:
+      - ./.docker/rabbitmq:/var/lib/rabbitmq
+    command: ["bash", "-c", "chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
+    networks:
+      - small-ecommerce-network
+
+networks:
+  small-ecommerce-network:
+    driver: bridge

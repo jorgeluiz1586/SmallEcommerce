@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package product;
+
+import "commons.proto";
+import "category.proto";
+
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  int32 stock = 4;
+  uint32 price = 5;
+  category.Category category = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+  int32 version = 9;
+}
+
+message CreateProductInput {
+  string name = 1;
+  string description = 2;
+  int32 stock = 3;
+  uint32 price = 4;
+  category.Category category = 5;
+}
+
+message UpdateProductInput {
+  string id = 1;
+  Product data = 2;
+}
+
+message FindProductsPayload {
+  repeated Product products = 1;
+  commons.PageInfo pageInfo = 2;
+}
+
+service ProductsService {
+  rpc find (commons.Query) returns (FindProductsPayload) {}
+  rpc findById (commons.Id) returns (Product) {}
+  rpc findOne (commons.Query) returns (Product) {}
+  rpc count (commons.Query) returns (commons.Count) {}
+  rpc create (CreateProductInput) returns (Product) {}
+  rpc update (UpdateProductInput) returns (Product) {}
+  rpc destroy (commons.Query) returns (commons.Count) {}
+}

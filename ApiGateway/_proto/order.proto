@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package order;
+
+import "commons.proto";
+import "user.proto";
+import "product.proto";
+
+message Order {
+  string id = 1;
+  product.Product product = 2;
+  user.User user = 3;
+  string status = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+  int32 version = 7;
+}
+
+message CreateOrderInput {
+  product.Product product = 1;
+  user.User user = 2;
+}
+
+message UpdateOrderInput {
+  string id = 1;
+  Order data = 2;
+}
+
+message FindOrdersPayload {
+  repeated Order Orders = 1;
+  commons.PageInfo pageInfo = 2;
+}
+
+service OrdersService {
+  rpc find (commons.Query) returns (FindOrdersPayload) {}
+  rpc findById (commons.Id) returns (Order) {}
+  rpc findOne (commons.Query) returns (Order) {}
+  rpc count (commons.Query) returns (commons.Count) {}
+  rpc create (CreateOrderInput) returns (Order) {}
+  rpc update (UpdateOrderInput) returns (Order) {}
+  rpc destroy (commons.Query) returns (commons.Count) {}
+}

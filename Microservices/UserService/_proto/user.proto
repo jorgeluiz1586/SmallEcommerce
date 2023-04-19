@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package user;
+
+import "commons.proto";
+
+message User {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  int32 birthdate = 4;
+  string email = 5;
+  string password = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+  int32 version = 9;
+}
+
+message CreateUserInput {
+  string first_name = 1;
+  string last_name = 2;
+  int32 birthdate = 3;
+  string email = 4;
+  string password = 5;
+}
+
+message UpdateUserInput {
+  string id = 1;
+  User data = 2;
+}
+
+message FindUsersPayload {
+  repeated User users = 1;
+  commons.PageInfo pageInfo = 2;
+}
+
+service UsersService {
+  rpc find (commons.Query) returns (FindUsersPayload) {}
+  rpc findById (commons.Id) returns (User) {}
+  rpc findOne (commons.Query) returns (User) {}
+  rpc count (commons.Query) returns (commons.Count) {}
+  rpc create (CreateUserInput) returns (User) {}
+  rpc update (UpdateUserInput) returns (User) {}
+  rpc destroy (commons.Query) returns (commons.Count) {}
+}

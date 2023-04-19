@@ -1,0 +1,87 @@
+version: '3.9'
+
+services:
+  product_service_dev:
+    container_name: product_service_dev
+    image: product-service-dev:1.0.0
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./.env
+    depends_on:
+      - product_service_db
+      - rabbitmq
+    restart: unless-stopped
+    working_dir: /usr/src/app
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    command: >
+      bash -c "
+        yarn start:dev
+      "
+    networks:
+      - small-ecommerce-network
+
+  product_service_prod:
+    container_name: product_service_prod
+    image: product-service-prod:1.0.0
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./.env
+    depends_on:
+      - product_service_db
+      - rabbitmq
+    restart: unless-stopped
+    working_dir: /usr/src/app
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    command: >
+      bash -c "
+        yarn start:prod
+      "
+    networks:
+      - small-ecommerce-network
+
+  product_service_db:
+    image: mongo
+    container_name: product_service_db
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    environment:
+      MONGODB_DATABASE: ${DB_DATABASE}
+    volumes:
+      - ./.docker/mongodb/database:/data/db
+    networks:
+      - small-ecommerce-network
+
+  rabbitmq:
+    image: rabbitmq:3.11-management-alpine
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: rabbitmq-host
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - ./rabbitmq.env
+    volumes:
+      - ./.docker/rabbitmq:/var/lib/rabbitmq
+    command: ["bash", "-c", "chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
+    networks:
+      - small-ecommerce-network
+
+networks:
+  small-ecommerce-network:
+    driver: bridge

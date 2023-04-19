@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package category;
+
+import "commons.proto";
+
+message Category {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+  int32 version = 6;
+}
+
+message CreateCategoryInput {
+  string name = 1;
+  string description = 2;
+}
+
+message UpdateCategoryInput {
+  string id = 1;
+  Category data = 2;
+}
+
+message FindCategoriesPayload {
+  repeated Category categories = 1;
+  commons.PageInfo pageInfo = 2;
+}
+
+service CategoriesService {
+  rpc find (commons.Query) returns (FindCategoriesPayload) {}
+  rpc findById (commons.Id) returns (Category) {}
+  rpc findOne (commons.Query) returns (Category) {}
+  rpc count (commons.Query) returns (commons.Count) {}
+  rpc create (CreateCategoryInput) returns (Category) {}
+  rpc update (UpdateCategoryInput) returns (Category) {}
+  rpc destroy (commons.Query) returns (commons.Count) {}
+}
